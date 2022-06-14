@@ -16,7 +16,11 @@ def _process_match(match):
     participants = {100: [], 200: []}
     for participant in match_info["participants"]:
         participants[participant["teamId"]].append(
-            {"championId": participant["championId"]}
+            {
+                "championId": participant["championId"],
+                "summoner1Id": participant["summoner1Id"],
+                "summoner2Id": participant["summoner2Id"],
+            }
         )
     assert len(participants) == 2, "Expected participants to come from two teams"
     return {
@@ -73,5 +77,6 @@ if __name__ == "__main__":
     dataset = MatchesDataset("./data")
     end_time = time.time()
     from pprint import pprint
+
     print(f"Loaded {len(dataset)} matches in {end_time - start_time:.2f} seconds")
     pprint(dataset[0])

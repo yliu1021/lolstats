@@ -6,18 +6,28 @@ class MatchModel(nn.Module):
     def __init__(self) -> None:
         super().__init__()
         self.player_encoder = nn.Sequential(
-            nn.Linear(160, 256),
+            nn.Linear(176, 256),
             nn.ReLU(),
+            nn.BatchNorm1d(256),
+            nn.Dropout(0.2),
             nn.Linear(256, 512),
             nn.ReLU(),
+            nn.BatchNorm1d(512),
+            nn.Dropout(0.2),
             nn.Linear(512, 1024),
-            nn.ReLU()
+            nn.ReLU(),
+            nn.BatchNorm1d(1024),
+            nn.Dropout(0.2),
         )
         self.match_predictor = nn.Sequential(
             nn.Linear(2048, 2048),
             nn.ReLU(),
+            nn.BatchNorm1d(2048),
+            nn.Dropout(0.2),
             nn.Linear(2048, 2048),
             nn.ReLU(),
+            nn.BatchNorm1d(2048),
+            nn.Dropout(0.2),
             nn.Linear(2048, 1),
             nn.Sigmoid()
         )

@@ -56,19 +56,19 @@ def main():
     train_dataset, val_dataset = random_split(dataset, lengths=[train_size, val_size])
     train_dataset = DataLoader(
         dataset=train_dataset,
-        batch_size=128,
+        batch_size=256,
         shuffle=True,
     )
     val_dataset = DataLoader(
         dataset=val_dataset,
-        batch_size=128,
+        batch_size=256,
         shuffle=True,
     )
 
     model = models.MatchModel()
     model = model.to(device)
     loss_fn = nn.BCELoss()
-    opt = optim.Adam(model.parameters(), lr=1e-4, weight_decay=1e-6)
+    opt = optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-4)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(opt, "min", factor=0.1, patience=15)
     for i in range(1, 150 + 1):
         print(f"Epoch {i}")
