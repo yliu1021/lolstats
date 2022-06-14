@@ -27,6 +27,7 @@ def train_epoch(model: nn.Module, train_dataset, val_dataset, opt, loss_fn):
     print()
 
     model.eval()
+    val_loss = 0
     with torch.no_grad():
         num_correct = 0
         num_seen = 0
@@ -35,11 +36,13 @@ def train_epoch(model: nn.Module, train_dataset, val_dataset, opt, loss_fn):
             y_true = data["team1Won"]
             y_pred = model(X)
             loss = loss_fn(y_pred, y_true)
+            val_loss = loss
             num_correct += (y_true == (y_pred >= 0.5)).float().sum()
             num_seen += len(y_true)
             accuracy = num_correct / num_seen
             print(f"\r[Val] Loss: {loss:.4f} | Acc: {accuracy * 100:.2f}%", end="")
         print()
+    return val_loss
 
 
 def main():
@@ -65,11 +68,13 @@ def main():
     model = models.MatchModel()
     model = model.to(device)
     loss_fn = nn.BCELoss()
-    opt = optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-4)
-
-    for i in range(1, 10 + 1):
+    opt = optim.Adam(model.parameters(), lr=1e-4, weight_decay=1e-6)
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(opt, "min", factor=0.1, patience=15)
+    for i in range(1, 150 + 1):
         print(f"Epoch {i}")
-        train_epoch(model, train_dataset, val_dataset, opt, loss_fn)
+        val_loss = train_epoch(model, train_dataset, val_dataset, opt, loss_fn)
+        scheduler.step(val_loss)
+    torch.save(model.state_dict(), "models/model_1.pt")
 
 
 if __name__ == "__main__":
