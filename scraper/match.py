@@ -4,6 +4,7 @@ Scrapes a bunch of matches and stores them
 import asyncio
 import sys
 import os
+import random
 
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo import errors
@@ -41,8 +42,9 @@ async def main(first_summoner: str):
             if puuid in seen_puuids:
                 continue
             seen_puuids.add(puuid)
-            matchlist = await lc.match.match_history(puuid=puuid, start_time=1654758000, type="MATCHED_GAME", count=100)
+            matchlist = await lc.match.match_history(puuid=puuid, start_time=1654758000, count=100)
             matchlist = [m for m in matchlist if m not in seen_matches]
+            random.shuffle(matchlist)
             should_retry = True
             while should_retry:
                 should_retry = False
