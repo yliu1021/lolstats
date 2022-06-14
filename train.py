@@ -42,7 +42,7 @@ def train_epoch(model: nn.Module, train_dataset, val_dataset, opt, loss_fn, devi
 
 
 def main():
-    device = torch.device("mps")
+    device = torch.device("cpu")
     dataset = matches.MatchesDataset(
         "./data", transforms=[transforms.TeamShuffle(), transforms.ToTensor()]
     )
