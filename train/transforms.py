@@ -41,7 +41,7 @@ class ToTensor:
         summoner_spell_encoding = torch.zeros(
             self.num_summoner_spells, dtype=torch.float32
         )
-        for summ_id in player["summonerIds"]:
+        for summ_id in player["summonerSpellIds"]:
             summoner_spell_encoding[self.summoner_spell_ids.index(summ_id)] = 1
 
         rune_encoding = torch.zeros(self.num_runes, dtype=torch.float32)

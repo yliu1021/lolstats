@@ -18,7 +18,7 @@ def _process_match(match):
         participants[participant["teamId"]].append(
             {
                 "championId": participant["championId"],
-                "summonerIds": [participant["summoner1Id"], participant["summoner2Id"]],
+                "summonerSpellIds": [participant["summoner1Id"], participant["summoner2Id"]],
                 "runeIds": [
                     selection["perk"]
                     for style in participant["perks"]["styles"]
