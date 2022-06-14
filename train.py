@@ -7,20 +7,21 @@ from torch import optim
 from train import matches, transforms, models
 
 
-def train_epoch(model: nn.Module, train_dataset, val_dataset, opt, loss_fn, device):
+
+def train_epoch(model: nn.Module, train_dataset, val_dataset, opt, loss_fn):
     model.train()
     num_correct = 0
     num_seen = 0
     for data in train_dataset:
-        X = data["game"].to(device)
-        y_true = data["team1Won"].to(device)
+        X = data["game"]
+        y_true = data["team1Won"]
         opt.zero_grad()
         y_pred = model(X)
         loss = loss_fn(y_pred, y_true)
         loss.backward()
         opt.step()
         num_correct += (y_true == (y_pred >= 0.5)).float().sum()
-        num_seen += len(X)
+        num_seen += len(y_true)
         accuracy = num_correct / num_seen
         print(f"\r[Train] Loss: {loss:.4f} | Acc: {accuracy * 100:.2f}%", end="")
     print()
@@ -30,12 +31,12 @@ def train_epoch(model: nn.Module, train_dataset, val_dataset, opt, loss_fn, devi
         num_correct = 0
         num_seen = 0
         for data in val_dataset:
-            X = data["game"].to(device)
-            y_true = data["team1Won"].to(device)
+            X = data["game"]
+            y_true = data["team1Won"]
             y_pred = model(X)
             loss = loss_fn(y_pred, y_true)
             num_correct += (y_true == (y_pred >= 0.5)).float().sum()
-            num_seen += len(X)
+            num_seen += len(y_true)
             accuracy = num_correct / num_seen
             print(f"\r[Val] Loss: {loss:.4f} | Acc: {accuracy * 100:.2f}%", end="")
         print()
@@ -44,7 +45,7 @@ def train_epoch(model: nn.Module, train_dataset, val_dataset, opt, loss_fn, devi
 def main():
     device = torch.device("cpu")
     dataset = matches.MatchesDataset(
-        "./data", transforms=[transforms.TeamShuffle(), transforms.ToTensor()]
+        "./data", transforms=[transforms.ToTensor()]
     )
     val_split = 0.3
     val_size = int(val_split * len(dataset))
@@ -68,7 +69,7 @@ def main():
 
     for i in range(1, 10 + 1):
         print(f"Epoch {i}")
-        train_epoch(model, train_dataset, val_dataset, opt, loss_fn, device)
+        train_epoch(model, train_dataset, val_dataset, opt, loss_fn)
 
 
 if __name__ == "__main__":
