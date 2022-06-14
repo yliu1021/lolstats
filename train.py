@@ -68,7 +68,7 @@ def main():
     model = models.MatchModel()
     model = model.to(device)
     loss_fn = nn.BCELoss()
-    opt = optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-4)
+    opt = optim.Adam(model.parameters(), lr=1e-4)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(opt, "min", factor=0.1, patience=15)
     for i in range(1, 150 + 1):
         print(f"Epoch {i}")

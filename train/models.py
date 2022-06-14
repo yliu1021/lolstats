@@ -6,41 +6,36 @@ class MatchModel(nn.Module):
     def __init__(self) -> None:
         super().__init__()
         self.player_encoder = nn.Sequential(
-            nn.Linear(176, 256),
+            nn.Linear(239, 256),
             nn.ReLU(),
-            nn.BatchNorm1d(256),
             nn.Dropout(0.2),
             nn.Linear(256, 512),
             nn.ReLU(),
-            nn.BatchNorm1d(512),
             nn.Dropout(0.2),
             nn.Linear(512, 1024),
             nn.ReLU(),
-            nn.BatchNorm1d(1024),
             nn.Dropout(0.2),
         )
         self.match_predictor = nn.Sequential(
             nn.Linear(2048, 2048),
             nn.ReLU(),
-            nn.BatchNorm1d(2048),
             nn.Dropout(0.2),
             nn.Linear(2048, 2048),
             nn.ReLU(),
-            nn.BatchNorm1d(2048),
             nn.Dropout(0.2),
             nn.Linear(2048, 1),
             nn.Sigmoid()
         )
     
     def encode_team(self, team: list[torch.Tensor]) -> torch.Tensor:
-        player_embeddings = torch.stack([self.player_encoder(player) for player in team], dim=1)
-        team_embedding = torch.sum(player_embeddings, dim=1)
+        team_embedding = sum(self.player_encoder(player) for player in team)
+        team_embedding /= len(team)
         return team_embedding
 
     def encode_game(self, game) -> torch.Tensor:
         team1_embeddings = self.encode_team(game["team1"])
         team2_embeddings = self.encode_team(game["team2"])
-        return torch.concat([team1_embeddings, team2_embeddings], dim=1)
+        return torch.concat([team1_embeddings, team2_embeddings], dim=-1)
 
     def forward(self, game) -> torch.Tensor:
         game_embeddings = self.encode_game(game)

@@ -18,8 +18,12 @@ def _process_match(match):
         participants[participant["teamId"]].append(
             {
                 "championId": participant["championId"],
-                "summoner1Id": participant["summoner1Id"],
-                "summoner2Id": participant["summoner2Id"],
+                "summonerIds": [participant["summoner1Id"], participant["summoner2Id"]],
+                "runeIds": [
+                    selection["perk"]
+                    for style in participant["perks"]["styles"]
+                    for selection in style["selections"]
+                ],
             }
         )
     assert len(participants) == 2, "Expected participants to come from two teams"
