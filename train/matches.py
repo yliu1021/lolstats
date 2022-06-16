@@ -27,6 +27,7 @@ def _process_match(match):
                     for style in participant["perks"]["styles"]
                     for selection in style["selections"]
                 ],
+                "summonerLevel": participant["summonerLevel"],
             }
         )
     assert len(participants) == 2, "Expected participants to come from two teams"
@@ -58,6 +59,8 @@ class MatchesDataset(Dataset):
             collection = db["matches"]
             matches = collection.find(
                 {
+                    "info.participants.0.gameEndedInSurrender": False,
+                    "info.participants.0.gameEndedInEarlySurrender": False,
                     "info.queueId": {"$lt": 2000},
                     "info.gameVersion": {"$regex": "^12\.11.*"},
                 }

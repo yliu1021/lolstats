@@ -64,7 +64,13 @@ class ToTensor:
         for rune_id in player["runeIds"]:
             rune_encoding[self.rune_ids[rune_id]] = 1
 
-        return torch.concat([champion_encoding, summoner_spell_encoding, rune_encoding])
+        summoner_level = torch.tensor(
+            [player["summonerLevel"] / 500], dtype=torch.float32
+        )  # normalize by 500
+
+        return torch.concat(
+            [champion_encoding, summoner_spell_encoding, rune_encoding, summoner_level]
+        )
 
     def _encode_team(self, team: list[dict]) -> torch.Tensor:
         return [self._encode_player(player) for player in team]

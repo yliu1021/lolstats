@@ -6,7 +6,7 @@ class MatchModel(nn.Module):
     def __init__(self) -> None:
         super().__init__()
         self.player_encoder = nn.Sequential(
-            nn.Linear(239, 256),
+            nn.Linear(240, 256),
             nn.ReLU(),
             nn.Dropout(0.2),
             nn.Linear(256, 512),
