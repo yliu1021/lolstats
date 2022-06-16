@@ -11,14 +11,17 @@ def _process_match(match):
     teams = {}
     for team in match_info["teams"]:
         teams[team["teamId"]] = team
-    assert len(teams) == 2, f"Expected two teams, got {teams} {match}"
+    assert len(teams) == 2, f"Expected two teams, got:\n{teams}\n\n{match}"
     assert 100 in teams and 200 in teams, "Expected team ids to be 100 and 200"
     participants = {100: [], 200: []}
     for participant in match_info["participants"]:
         participants[participant["teamId"]].append(
             {
                 "championId": participant["championId"],
-                "summonerSpellIds": [participant["summoner1Id"], participant["summoner2Id"]],
+                "summonerSpellIds": [
+                    participant["summoner1Id"],
+                    participant["summoner2Id"],
+                ],
                 "runeIds": [
                     selection["perk"]
                     for style in participant["perks"]["styles"]
@@ -28,7 +31,11 @@ def _process_match(match):
         )
     assert len(participants) == 2, "Expected participants to come from two teams"
     return {
-        "game": {"team1": participants[100], "team2": participants[200]},
+        "game": {
+            "team1": participants[100],
+            "team2": participants[200],
+            "queue": match_info["queueId"],
+        },
         "team1Won": int(teams[100]["win"]),
     }
 
@@ -51,7 +58,7 @@ class MatchesDataset(Dataset):
             collection = db["matches"]
             matches = collection.find(
                 {
-                    "info.queueId": {"$in": [400, 420, 430, 440, 700]},
+                    "info.queueId": {"$lt": 2000},
                     "info.gameVersion": {"$regex": "^12\.11.*"},
                 }
             )

@@ -17,7 +17,7 @@ class MatchModel(nn.Module):
             nn.Dropout(0.2),
         )
         self.match_predictor = nn.Sequential(
-            nn.Linear(2048, 2048),
+            nn.Linear(2099, 2048),
             nn.ReLU(),
             nn.Dropout(0.2),
             nn.Linear(2048, 2048),
@@ -35,7 +35,7 @@ class MatchModel(nn.Module):
     def encode_game(self, game) -> torch.Tensor:
         team1_embeddings = self.encode_team(game["team1"])
         team2_embeddings = self.encode_team(game["team2"])
-        return torch.concat([team1_embeddings, team2_embeddings], dim=-1)
+        return torch.concat([team1_embeddings, team2_embeddings, game["queue"]], dim=-1)
 
     def forward(self, game) -> torch.Tensor:
         game_embeddings = self.encode_game(game)
