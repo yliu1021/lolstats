@@ -90,9 +90,16 @@ class ToTensor:
 class TeamShuffle:
     def __call__(self, sample):
         if random.random() < 0.5:
-            random.shuffle(sample["game"]["team1"])
-            random.shuffle(sample["game"]["team2"])
-        return sample
+            return {
+                "game": {
+                    "team1": sample["game"]["team2"],
+                    "team2": sample["game"]["team1"],
+                    "queue": sample["game"]["queue"],
+                },
+                "team1Won": 1 - sample["team1Won"],
+            }
+        else:
+            return sample
 
 
 if __name__ == "__main__":

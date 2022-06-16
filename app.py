@@ -20,8 +20,6 @@ model.eval()
 
 
 def predict_game(game):
-    if game["gameQueueConfigId"] not in [400, 420, 430, 440, 700]:
-        return {"error": "unsupported game mode"}
     participants = {100: [], 200: []}
     for participant in game["participants"]:
         participants[participant["teamId"]].append(
@@ -33,24 +31,29 @@ def predict_game(game):
                     for perk_id in participant["perks"]["perkIds"]
                     if perk_id > 5100
                 ],
-                "summonerName": participant["summonerName"]
+                "summonerName": participant["summonerName"],
             }
         )
     if len(participants) != 2:
-        return {"error": "Expected participants to come from two teams"}
-    X = {
-        "game": {"team1": participants[100], "team2": participants[200]},
-        "team1Won": 0
-    }
-    X = transforms.ToTensor()({
-        "game": {"team1": participants[100], "team2": participants[200]},
-        "team1Won": 0
-    })["game"]
+        return {"error": "Expected participants to come from two teams"}, 400
+    try:
+        X = transforms.ToTensor()(
+            {
+                "game": {
+                    "team1": participants[100],
+                    "team2": participants[200],
+                    "queue": game["gameQueueConfigId"],
+                },
+                "team1Won": 0,
+            }
+        )["game"]
+    except:
+        return {"error": "Game queue not supported"}, 400
     y = model(X)
     return {
         "team1": participants[100],
         "team2": participants[200],
-        "prediction": y.item()
+        "prediction": y.item(),
     }
 
 
@@ -66,8 +69,7 @@ async def get_live_game():
             return {"error": "summoner not found"}, 404
         try:
             game = await lc.spectator.by_summoner(summoner["id"])
-        except HTTPError as e:
-            print(e)
+        except HTTPError:
             return {"error": "game not found"}, 404
         return predict_game(game)
 
