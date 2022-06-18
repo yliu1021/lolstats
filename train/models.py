@@ -2,31 +2,37 @@ import torch
 from torch import nn
 
 
+class BNLinear(nn.Module):
+    def __init__(self, in_features: int, out_features: int, dropout: float) -> None:
+        super().__init__()
+        self.linear = nn.Linear(in_features, out_features)
+        self.activation = nn.ReLU()
+        self.bn = nn.BatchNorm1d(out_features)
+        self.dropout = nn.Dropout(dropout)
+
+    def forward(self, x):
+        x = self.linear(x)
+        x = self.activation(x)
+        x = self.bn(x)
+        x = self.dropout(x)
+        return x
+
+
 class MatchModel(nn.Module):
     def __init__(self) -> None:
         super().__init__()
         self.player_encoder = nn.Sequential(
-            nn.Linear(240, 256),
-            nn.ReLU(),
-            nn.Dropout(0.2),
-            nn.Linear(256, 512),
-            nn.ReLU(),
-            nn.Dropout(0.2),
-            nn.Linear(512, 1024),
-            nn.ReLU(),
-            nn.Dropout(0.2),
+            BNLinear(240, 256, 0.2),
+            BNLinear(256, 512, 0.2),
+            BNLinear(512, 1024, 0.2),
         )
         self.match_predictor = nn.Sequential(
-            nn.Linear(2099, 2048),
-            nn.ReLU(),
-            nn.Dropout(0.2),
-            nn.Linear(2048, 2048),
-            nn.ReLU(),
-            nn.Dropout(0.2),
+            BNLinear(2099, 2048, 0.2),
+            BNLinear(2048, 2048, 0.2),
             nn.Linear(2048, 1),
-            nn.Sigmoid()
+            nn.Sigmoid(),
         )
-    
+
     def encode_team(self, team: list[torch.Tensor]) -> torch.Tensor:
         team_embedding = sum(self.player_encoder(player) for player in team)
         team_embedding /= len(team)
