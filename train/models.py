@@ -22,9 +22,9 @@ class MatchModel(nn.Module):
     def __init__(self) -> None:
         super().__init__()
         self.player_encoder = nn.Sequential(
-            BNLinear(240, 256, 0.2),
-            BNLinear(256, 512, 0.2),
-            BNLinear(512, 1024, 0.2),
+            BNLinear(240, 1024, 0.2),
+            BNLinear(1024, 1024, 0.2),
+            BNLinear(1024, 1024, 0.2),
         )
         self.match_predictor = nn.Sequential(
             BNLinear(2099, 2048, 0.2),

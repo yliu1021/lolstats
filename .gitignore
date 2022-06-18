@@ -5,8 +5,11 @@ __pycache__/
 # IDE
 .vscode/
 
-# Misc
-.env
+# ML
 data/
 analysis/
 models/
+
+# Misc
+.env
+.service_key.json
