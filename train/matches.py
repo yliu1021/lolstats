@@ -42,11 +42,12 @@ def _process_match(match):
 
 
 class MatchesDataset(Dataset):
-    def __init__(self, data_loc: str | pathlib.Path, transforms=None) -> None:
+    def __init__(
+        self, data_loc: str | pathlib.Path, game_transforms=None, sample_transforms=None
+    ) -> None:
         super().__init__()
-        self.transforms = transforms
-        if self.transforms is None:
-            self.transforms = []
+        self.game_transforms = [] if game_transforms is None else game_transforms
+        self.sample_transforms = [] if sample_transforms is None else sample_transforms
         data_loc = pathlib.Path(data_loc)
         data_loc.mkdir(exist_ok=True)
         data_path = data_loc / "matches_v1.pickle"
@@ -80,10 +81,12 @@ class MatchesDataset(Dataset):
         return len(self.matches)
 
     def __getitem__(self, index):
-        match = self.matches[index]
-        for transform in self.transforms:
-            match = transform(match)
-        return match
+        sample = self.matches[index]
+        for transform in self.game_transforms:
+            sample["game"] = transform(sample["game"])
+        for transform in self.sample_transforms:
+            sample = transform(sample)
+        return sample
 
 
 if __name__ == "__main__":

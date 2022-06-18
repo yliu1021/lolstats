@@ -4,7 +4,7 @@ import random
 import torch
 
 
-class ToTensor:
+class GameToTensor:
     """Converts game data to tensor"""
 
     def __init__(self) -> None:
@@ -80,15 +80,22 @@ class ToTensor:
         queue_encoding[self.queue_ids[queue_id]] = 1
         return queue_encoding
 
-    def __call__(self, sample):
-        game = sample["game"]
+    def __call__(self, game):
         game = {
             "team1": self._encode_team(game["team1"]),
             "team2": self._encode_team(game["team2"]),
             "queue": self._encode_queue_id(game["queue"]),
         }
+        return game
+
+
+class ToTensor:
+    def __init__(self) -> None:
+        self.game_transform = GameToTensor()
+
+    def __call__(self, sample):
         return {
-            "game": game,
+            "game": self.game_transform(sample["game"]),
             "team1Won": torch.tensor([sample["team1Won"]], dtype=torch.float32),
         }
 
@@ -106,7 +113,3 @@ class TeamShuffle:
             }
         else:
             return sample
-
-
-if __name__ == "__main__":
-    x = ToTensor()

@@ -53,7 +53,7 @@ def train_epoch(model: nn.Module, train_dataset, val_dataset, opt, loss_fn):
 def main():
     device = torch.device("cpu")
     dataset = matches.MatchesDataset(
-        "./data", transforms=[transforms.TeamShuffle(), transforms.ToTensor()]
+        "./data", sample_transforms=[transforms.TeamShuffle(), transforms.ToTensor()]
     )
     val_split = 0.3
     val_size = int(val_split * len(dataset))
