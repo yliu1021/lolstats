@@ -28,7 +28,7 @@ def move_to_device(x, device):
     raise ValueError(f"Unsupported class {type(x)}")
 
 
-def train_epoch(model: nn.Module, train_dataset, val_dataset, opt, loss_fn, device):
+def train(model: nn.Module, train_dataset, opt, loss_fn, device):
     model.train()
     num_correct = 0
     num_seen = 0
@@ -50,7 +50,10 @@ def train_epoch(model: nn.Module, train_dataset, val_dataset, opt, loss_fn, devi
         msg = f"[Train] (Time per batch: {elapsed_time:.3f} s) ({i+1} / {len(train_dataset)}) Loss: {loss:.4f} | Acc: {accuracy * 100:.2f}%"
         msg_id = service.add_message(msg, message_id=msg_id)
         print(f"\r{msg}", end="")
+    print()
 
+
+def validate(model: nn.Module, val_dataset, loss_fn, device):
     model.eval()
     val_loss = 0
     msg_id = None
@@ -94,13 +97,19 @@ def main(device: str, batch_size: int):
     model = models.MatchModel()
     model = model.to(device)
     loss_fn = nn.BCELoss()
-    opt = optim.Adam(model.parameters(), lr=1e-4)
+    opt = optim.Adam(model.parameters(), lr=1e-3)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(
         opt, "min", factor=0.1, patience=15
     )
+    for i in range(10):
+        print(f"Warmup {i+1} / 10")
+        for p in opt.param_groups:
+            p["lr"] = (i + 1) / 10 * 1e-3
+        train(model, train_dataset, opt, loss_fn, device)
     for i in range(1, 150 + 1):
-        print(f"Epoch {i}")
-        val_loss = train_epoch(model, train_dataset, val_dataset, opt, loss_fn, device)
+        print(f"Epoch {i} / 150")
+        train(model, train_dataset, opt, loss_fn, device)
+        val_loss = validate(model, val_dataset, loss_fn, device)
         scheduler.step(val_loss)
         torch.save(model.state_dict(), "models/model_1.pt")
 
