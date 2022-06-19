@@ -49,28 +49,36 @@ class GameToTensor:
         )
         self.num_queues = len(self.queue_ids)
 
-    def _encode_player(self, player: dict) -> torch.Tensor:
+    def _encode_champion(self, champion_id: int) -> torch.Tensor:
         champion_encoding = torch.zeros(self.num_champions, dtype=torch.float32)
-        champion_encoding[self.champion_ids[player["championId"]]] = 1
+        champion_encoding[self.champion_ids[champion_id]] = 1
+        return champion_encoding
 
+    def _encode_summoner_spells(self, summoner_spell_ids: list[int]) -> torch.Tensor:
         summoner_spell_encoding = torch.zeros(
             self.num_summoner_spells, dtype=torch.float32
         )
-        for summ_id in player["summonerSpellIds"]:
+        for summ_id in summoner_spell_ids:
             if summ_id in self.summoner_spell_ids:
                 summoner_spell_encoding[self.summoner_spell_ids[summ_id]] = 1
+        return summoner_spell_encoding
 
+    def _encode_rune_ids(self, rune_ids: list[int]) -> torch.Tensor:
         rune_encoding = torch.zeros(self.num_runes, dtype=torch.float32)
-        for rune_id in player["runeIds"]:
+        for rune_id in rune_ids:
             rune_encoding[self.rune_ids[rune_id]] = 1
+        return rune_encoding
 
-        summoner_level = torch.tensor(
-            [player["summonerLevel"] / 500], dtype=torch.float32
-        )  # normalize by 500
+    def _encode_summoner_level(self, summoner_level: int) -> torch.Tensor:
+        return torch.tensor([summoner_level / 155], dtype=torch.float32)
 
-        return torch.concat(
-            [champion_encoding, summoner_spell_encoding, rune_encoding, summoner_level]
-        )
+    def _encode_player(self, player: dict) -> torch.Tensor:
+        return {
+            "champion": self._encode_champion(player["championId"]),
+            "summonerSpells": self._encode_summoner_spells(player["summonerSpellIds"]),
+            "runes": self._encode_rune_ids(player["runeIds"]),
+            "summonerLevel": self._encode_summoner_level(player["summonerLevel"]),
+        }
 
     def _encode_team(self, team: list[dict]) -> torch.Tensor:
         return [self._encode_player(player) for player in team]

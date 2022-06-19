@@ -32,11 +32,11 @@ def train_epoch(model: nn.Module, train_dataset, val_dataset, opt, loss_fn, devi
     model.train()
     num_correct = 0
     num_seen = 0
-    start_time = time.time()
     msg_id = None
     for i, data in enumerate(train_dataset):
+        start_time = time.time()
         X = move_to_device(data["game"], device)
-        y_true = move_to_device(data["team1Won"], device)
+        y_true = data["team1Won"].to(device)
         opt.zero_grad()
         y_pred = model(X)
         loss = loss_fn(y_pred, y_true)
@@ -47,11 +47,9 @@ def train_epoch(model: nn.Module, train_dataset, val_dataset, opt, loss_fn, devi
         num_seen += len(y_true)
         accuracy = num_correct / num_seen
         elapsed_time = time.time() - start_time
-        time_per_batch = elapsed_time / (i + 1)
-        msg = f"[Train] (Time per batch: {time_per_batch:.3f} s) ({i+1} / {len(train_dataset)}) Loss: {loss:.4f} | Acc: {accuracy * 100:.2f}%"
+        msg = f"[Train] (Time per batch: {elapsed_time:.3f} s) ({i+1} / {len(train_dataset)}) Loss: {loss:.4f} | Acc: {accuracy * 100:.2f}%"
         msg_id = service.add_message(msg, message_id=msg_id)
         print(f"\r{msg}", end="")
-    print(f"... Finished in {elapsed_time:.2f} seconds")
 
     model.eval()
     val_loss = 0
@@ -87,22 +85,15 @@ def main(device: str, batch_size: int):
     print(f"Training on {train_size:,} samples")
     print(f"Validating on {val_size:,} samples")
     train_dataset = DataLoader(
-        dataset=train_dataset,
-        batch_size=batch_size,
-        shuffle=True,
+        dataset=train_dataset, batch_size=batch_size, shuffle=True, num_workers=4
     )
     val_dataset = DataLoader(
-        dataset=val_dataset,
-        batch_size=batch_size,
-        shuffle=True,
+        dataset=val_dataset, batch_size=batch_size, shuffle=True, num_workers=4
     )
 
     model = models.MatchModel()
     model = model.to(device)
-    loss_fn = (
-        lambda inp, target: sum(F.binary_cross_entropy(inp, target, reduction="none"))
-        / batch_size
-    )
+    loss_fn = nn.BCELoss()
     opt = optim.Adam(model.parameters(), lr=1e-4)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(
         opt, "min", factor=0.1, patience=15
