@@ -1,6 +1,7 @@
 import time
 import pathlib
 import pickle
+import functools
 
 from pymongo.mongo_client import MongoClient
 from torch.utils.data import Dataset
@@ -80,6 +81,7 @@ class MatchesDataset(Dataset):
     def __len__(self) -> int:
         return len(self.matches)
 
+    @functools.cache
     def __getitem__(self, index):
         sample = self.matches[index]
         for transform in self.game_transforms:
