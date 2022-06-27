@@ -8,7 +8,7 @@ class GameToTensor:
     """Converts game data to tensor"""
 
     def __init__(self) -> None:
-        champions = json.load(open("./datadragon/12.11.1/champion.json", "r"))
+        champions = json.load(open("./datadragon/12.11.1/champion.json", "r", encoding="utf8"))
         champions = champions["data"]
         champions = dict(
             (int(champion["key"]), champion) for champion in champions.values()

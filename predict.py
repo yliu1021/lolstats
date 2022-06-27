@@ -15,7 +15,7 @@ import train
 load_dotenv()
 riot_key = os.getenv("RIOT_KEY")
 
-champions_ = json.load(open("./datadragon/12.11.1/champion.json", "r"))
+champions_ = json.load(open("./datadragon/12.11.1/champion.json", "r", encoding="utf8"))
 champions_ = champions_["data"]
 champions_ = dict((int(champion["key"]), champion) for champion in champions_.values())
 
@@ -131,7 +131,7 @@ class Predictor:
 
 
 async def main(summoner_name: str):
-    predictor = Predictor("models/20220621_21-55-13/epoch_1/model.pt")
+    predictor = Predictor("models/20220627_06-05-18/epoch_12/model.pt")
     game, pred = await predictor.predict(summoner_name)
     print(game)
     print(f"Chances of winning: {pred}")
