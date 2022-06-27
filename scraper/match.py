@@ -56,7 +56,7 @@ async def main():
                 continue
             seen_puuids.add(puuid)
             matchlist = await lc.match.match_history(
-                puuid=puuid, start_time=1654758000, count=100
+                puuid=puuid, start_time=1655989200, count=100
             )
             matchlist = [m for m in matchlist if m not in seen_matches]
             random.shuffle(matchlist)
@@ -79,7 +79,7 @@ async def main():
                         end="",
                         flush=True,
                     )
-                    await asyncio.sleep(2*random.random() + 1)
+                    # await asyncio.sleep(2*random.random() + 1)
                 except HTTPError as e:
                     if e.status == 429:
                         print("Rate limited")

@@ -40,7 +40,7 @@ class MatchModel(nn.Module):
         self.rune_embedding = Embedding(num_indices=63, embedding_dims=64, num_ones=6)
         self.queue_embedding = Embedding(num_indices=51, embedding_dims=64, num_ones=1)
         self.player_embedding = nn.Sequential(
-            BNLinear(353, 512, 0.1),
+            BNLinear(352, 512, 0.1),
             BNLinear(512, 1024, 0.1),
             BNLinear(1024, 1024, 0.1),
         )
@@ -57,7 +57,6 @@ class MatchModel(nn.Module):
                 self.champion_embedding(player["champion"]),
                 self.summoner_spell_embedding(player["summonerSpells"]),
                 self.rune_embedding(player["runes"]),
-                player["summonerLevel"],
             ],
             dim=-1,
         )

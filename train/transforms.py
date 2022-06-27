@@ -77,7 +77,6 @@ class GameToTensor:
             "champion": self._encode_champion(player["championId"]),
             "summonerSpells": self._encode_summoner_spells(player["summonerSpellIds"]),
             "runes": self._encode_rune_ids(player["runeIds"]),
-            "summonerLevel": self._encode_summoner_level(player["summonerLevel"]),
         }
 
     def _encode_team(self, team: list[dict]) -> torch.Tensor:
