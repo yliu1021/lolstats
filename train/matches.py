@@ -31,6 +31,7 @@ def _process_match(match):
             }
         )
     assert len(participants) == 2, "Expected participants to come from two teams"
+    assert len(participants[200]) == len(participants[100]) == 5, "Expected 5 players on each team"
     return {
         "game": {
             "team1": participants[100],
@@ -62,7 +63,7 @@ class MatchesDataset(Dataset):
                 {
                     "info.participants.0.gameEndedInSurrender": False,
                     "info.participants.0.gameEndedInEarlySurrender": False,
-                    "info.queueId": {"$lt": 2000},
+                    "info.queueId": {"$lt": 2000, "$gt": 320},
                     "info.gameVersion": {"$regex": "^12\.12.*"},
                 }
             )

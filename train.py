@@ -30,7 +30,6 @@ def train(model: nn.Module, train_dataset, opt, loss_fn, device):
     model.train()
     num_correct = 0
     num_seen = 0
-    msg_id = None
     for i, data in enumerate(train_dataset):
         start_time = time.time()
         X = move_to_device(data["game"], device)
@@ -86,10 +85,10 @@ def main(
     print(f"Training on {train_size:,} samples")
     print(f"Validating on {val_size:,} samples")
     train_dataset = DataLoader(
-        dataset=train_dataset, batch_size=batch_size, shuffle=True, num_workers=4
+        dataset=train_dataset, batch_size=batch_size, shuffle=True, num_workers=0
     )
     val_dataset = DataLoader(
-        dataset=val_dataset, batch_size=batch_size, shuffle=True, num_workers=4
+        dataset=val_dataset, batch_size=batch_size, shuffle=True, num_workers=0
     )
 
     model = models.MatchModel()

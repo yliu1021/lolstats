@@ -8,7 +8,7 @@ class GameToTensor:
     """Converts game data to tensor"""
 
     def __init__(self) -> None:
-        champions = json.load(open("./datadragon/12.11.1/champion.json", "r", encoding="utf8"))
+        champions = json.load(open("./datadragon/12.12.1/champion.json", "r", encoding="utf8"))
         champions = champions["data"]
         champions = dict(
             (int(champion["key"]), champion) for champion in champions.values()
@@ -18,7 +18,7 @@ class GameToTensor:
         )
         self.num_champions = len(self.champion_ids)
 
-        summoner_spells = json.load(open("./datadragon/12.11.1/summoner.json", "r"))
+        summoner_spells = json.load(open("./datadragon/12.12.1/summoner.json", "r"))
         summoner_spells = summoner_spells["data"]
         summoner_spells = dict(
             (int(summoner_spell["key"]), summoner_spell)
@@ -29,7 +29,7 @@ class GameToTensor:
         )
         self.num_summoner_spells = len(self.summoner_spell_ids)
 
-        runes_raw = json.load(open("./datadragon/12.11.1/runesReforged.json", "r"))
+        runes_raw = json.load(open("./datadragon/12.12.1/runesReforged.json", "r"))
         runes = {}
         for rune_page in runes_raw:
             for rune_slots in rune_page["slots"]:
@@ -68,9 +68,6 @@ class GameToTensor:
         for rune_id in rune_ids:
             rune_encoding[self.rune_ids[rune_id]] = 1
         return rune_encoding
-
-    def _encode_summoner_level(self, summoner_level: int) -> torch.Tensor:
-        return torch.tensor([summoner_level / 155], dtype=torch.float32)
 
     def _encode_player(self, player: dict) -> torch.Tensor:
         return {
