@@ -131,7 +131,7 @@ class Predictor:
 
 
 async def main(summoner_name: str):
-    predictor = Predictor("models/20220627_06-05-18/epoch_12/model.pt")
+    predictor = Predictor("models/20220628_03-29-50/epoch_9/model.pt")
     game, pred = await predictor.predict(summoner_name)
     print(game)
     print(f"Chances of winning: {pred}")

@@ -92,7 +92,7 @@ def main(
     )
 
     model = models.MatchModel()
-    opt = optim.Adam(model.parameters(), lr=lr)
+    opt = optim.Adam(model.parameters(), lr=lr, weight_decay=1e-4)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(
         opt, "min", factor=0.1, patience=15
     )
@@ -113,7 +113,7 @@ def main(
         model = model.to(device)
         save_path = pathlib.Path("models") / datetime.now().strftime("%Y%m%d_%H-%M-%S")
         save_path.mkdir(exist_ok=True)
-        for i in range(10):
+        for i in range(5):
             print(f"Warmup {i+1} / 10")
             for p in opt.param_groups:
                 p["lr"] = (i + 1) / 10 * lr
