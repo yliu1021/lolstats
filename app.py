@@ -1,7 +1,6 @@
 import os
 
 from flask import Flask, request
-from riotapi import LolClient, HTTPError
 from dotenv import load_dotenv
 
 from predict import Predictor
@@ -12,7 +11,7 @@ riot_key = os.getenv("RIOT_KEY")
 
 app = Flask(__name__)
 
-predictor = Predictor("models/20220708_23-12-18/epoch_45/model.pt")
+predictor = Predictor("models/20220708_23-12-18/epoch_46/model.pt")
 
 
 @app.get("/live")
