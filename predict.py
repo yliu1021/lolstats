@@ -108,7 +108,7 @@ class Game:
 class Predictor:
     def __init__(self, model_path: str) -> None:
         self.model = train.models.MatchModel()
-        self.model.load_state_dict(torch.load(model_path))
+        self.model.load_state_dict(torch.load(model_path, map_location=torch.device("cpu")))
         self.model.eval()
 
     def make_batch(self, d):
