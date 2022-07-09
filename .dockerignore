@@ -1,9 +1,3 @@
-# Models
-models/
-
-# Static
-static/
-
 # Git
 .git/
 
@@ -13,3 +7,6 @@ __pycache__
 *.pyo
 *.pyd
 venv
+
+# IDE
+.vscode/
