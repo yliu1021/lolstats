@@ -10,6 +10,8 @@ from torch import nn
 from torch import optim
 from torch.nn import functional as F
 
+import numpy as np
+
 from train import matches, transforms, models
 
 
@@ -30,6 +32,7 @@ def train(model: nn.Module, train_dataset, opt, loss_fn, device):
     model.train()
     num_correct = 0
     num_seen = 0
+    losses = []
     for i, data in enumerate(train_dataset):
         start_time = time.time()
         X = move_to_device(data["game"], device)
@@ -44,7 +47,8 @@ def train(model: nn.Module, train_dataset, opt, loss_fn, device):
         num_seen += len(y_true)
         accuracy = num_correct / num_seen
         elapsed_time = time.time() - start_time
-        msg = f"[Train] (Time per batch: {elapsed_time:.3f} s) ({i+1} / {len(train_dataset)}) Loss: {loss:.4f} | Acc: {accuracy * 100:.2f}%"
+        losses.append(loss)
+        msg = f"[Train] (Time per batch: {elapsed_time:.3f} s) ({i+1} / {len(train_dataset)}) Loss: {np.mean(losses):.4f} | Acc: {accuracy * 100:.2f}%"
         print(f"\r{msg}", end="")
     print()
 
@@ -52,7 +56,7 @@ def train(model: nn.Module, train_dataset, opt, loss_fn, device):
 def validate(model: nn.Module, val_dataset, loss_fn, device):
     model.eval()
     val_loss = 0
-    msg_id = None
+    losses = []
     with torch.no_grad():
         num_correct = 0
         num_seen = 0
@@ -65,10 +69,11 @@ def validate(model: nn.Module, val_dataset, loss_fn, device):
             num_correct += (y_true == (y_pred >= 0.5)).float().sum()
             num_seen += len(y_true)
             accuracy = num_correct / num_seen
-            msg = f"[Val] ({i+1} / {len(val_dataset)}) Loss: {val_loss:.4f} | Acc: {accuracy * 100:.2f}%"
+            losses.append(val_loss)
+            msg = f"[Val] ({i+1} / {len(val_dataset)}) Loss: {np.mean(losses):.4f} | Acc: {accuracy * 100:.2f}%"
             print(f"\r{msg}", end="")
         print()
-    return val_loss
+    return np.mean(losses)
 
 
 def main(
@@ -88,14 +93,10 @@ def main(
         dataset=train_dataset, batch_size=batch_size, shuffle=True, num_workers=0
     )
     val_dataset = DataLoader(
-        dataset=val_dataset, batch_size=batch_size, shuffle=True, num_workers=0
+        dataset=val_dataset, batch_size=2048, shuffle=True, num_workers=0
     )
 
     model = models.MatchModel()
-    opt = optim.Adam(model.parameters(), lr=lr, weight_decay=1e-4)
-    scheduler = optim.lr_scheduler.ReduceLROnPlateau(
-        opt, "min", factor=0.1, patience=15
-    )
     loss_fn = nn.BCELoss()
     if save_path is not None:
         save_path = pathlib.Path("models") / save_path
@@ -103,21 +104,17 @@ def main(
         start_epoch = max(int(str(e).split("_")[-1]) for e in epochs) + 1
         epoch_save_path = save_path / f"epoch_{start_epoch - 1}"
         model.load_state_dict(torch.load(epoch_save_path / "model.pt"))
-        opt.load_state_dict(torch.load(epoch_save_path / "opt.pt"))
-        scheduler.load_state_dict(torch.load(epoch_save_path / "scheduler.pt"))
         print(f'Loaded model from "{epoch_save_path}". Validating...')
         model = model.to(device)
-        validate(model, val_dataset, loss_fn, device)
     else:
         start_epoch = 1
         model = model.to(device)
         save_path = pathlib.Path("models") / datetime.now().strftime("%Y%m%d_%H-%M-%S")
         save_path.mkdir(exist_ok=True)
-        for i in range(5):
-            print(f"Warmup {i+1} / 10")
-            for p in opt.param_groups:
-                p["lr"] = (i + 1) / 10 * lr
-            train(model, train_dataset, opt, loss_fn, device)
+    opt = optim.Adam(model.parameters(), lr=lr, weight_decay=1e-4)
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(
+        opt, "min", factor=0.1, patience=15
+    )
     for i in range(start_epoch, 150 + 1):
         print(f"Epoch {i} / 150")
         train(model, train_dataset, opt, loss_fn, device)
@@ -126,8 +123,6 @@ def main(
         epoch_save_path = save_path / f"epoch_{i}"
         epoch_save_path.mkdir(exist_ok=True)
         torch.save(model.state_dict(), epoch_save_path / "model.pt")
-        torch.save(opt.state_dict(), epoch_save_path / "opt.pt")
-        torch.save(scheduler.state_dict(), epoch_save_path / "scheduler.pt")
 
 
 if __name__ == "__main__":

@@ -35,7 +35,10 @@ class Player:
         self.champion = champion["name"]
 
     def to_json(self) -> dict:
-        return self.participant_info
+        return {
+            **self.participant_info,
+            "champion": self.champion
+        }
     
     def __repr__(self) -> str:
         return f"{self.name} ({self.champion})"

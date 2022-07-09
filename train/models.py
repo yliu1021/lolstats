@@ -40,16 +40,15 @@ class MatchModel(nn.Module):
         self.rune_embedding = Embedding(num_indices=63, embedding_dims=64, num_ones=6)
         self.queue_embedding = Embedding(num_indices=51, embedding_dims=64, num_ones=1)
         self.player_embedding = nn.Sequential(
-            BNLinear(352, 512, 0.2),
-            BNLinear(512, 1024, 0.2),
-            BNLinear(1024, 2048, 0.2),
-            BNLinear(2048, 4096, 0.2),
+            BNLinear(352, 4096, 0.1),
+            BNLinear(4096, 4096, 0.1),
+            BNLinear(4096, 4096, 0.1),
         )
         self.game_predictor = nn.Sequential(
-            BNLinear(2 * 4096 + 64, 4096, 0.2),
-            BNLinear(4096, 4096, 0.2),
-            BNLinear(4096, 4096, 0.2),
-            nn.Linear(4096, 1, bias=False),
+            BNLinear(2 * 4096 + 64, 8192, 0.1),
+            BNLinear(8192, 8192, 0.1),
+            BNLinear(8192, 8192, 0.1),
+            nn.Linear(8192, 1, bias=False),
             nn.Sigmoid(),
         )
 

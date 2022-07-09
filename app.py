@@ -1,12 +1,10 @@
 import os
 
-import torch
-
 from flask import Flask, request
 from riotapi import LolClient, HTTPError
 from dotenv import load_dotenv
 
-from train import models, transforms
+from predict import Predictor
 
 # Load environment file
 load_dotenv()
@@ -14,47 +12,7 @@ riot_key = os.getenv("RIOT_KEY")
 
 app = Flask(__name__)
 
-model = models.MatchModel()
-model.load_state_dict(torch.load("./models/model_1.pt"))
-model.eval()
-
-
-def predict_game(game):
-    participants = {100: [], 200: []}
-    for participant in game["participants"]:
-        participants[participant["teamId"]].append(
-            {
-                "championId": participant["championId"],
-                "summonerSpellIds": [participant["spell1Id"], participant["spell2Id"]],
-                "runeIds": [
-                    perk_id
-                    for perk_id in participant["perks"]["perkIds"]
-                    if perk_id > 5100
-                ],
-                "summonerName": participant["summonerName"],
-            }
-        )
-    if len(participants) != 2:
-        return {"error": "Expected participants to come from two teams"}, 400
-    try:
-        X = transforms.ToTensor()(
-            {
-                "game": {
-                    "team1": participants[100],
-                    "team2": participants[200],
-                    "queue": game["gameQueueConfigId"],
-                },
-                "team1Won": 0,
-            }
-        )["game"]
-    except:
-        return {"error": "Game queue not supported"}, 400
-    y = model(X)
-    return {
-        "team1": participants[100],
-        "team2": participants[200],
-        "prediction": y.item(),
-    }
+predictor = Predictor("models/20220708_23-12-18/epoch_45/model.pt")
 
 
 @app.get("/live")
@@ -62,16 +20,14 @@ async def get_live_game():
     summoner_name = request.args.get("summoner", type=str)
     if summoner_name is None:
         return {"error": "missing summoner query parameter"}, 400
-    async with LolClient(riot_key) as lc:
-        try:
-            summoner = await lc.summoner.by_name(summoner_name)
-        except HTTPError:
-            return {"error": "summoner not found"}, 404
-        try:
-            game = await lc.spectator.by_summoner(summoner["id"])
-        except HTTPError:
-            return {"error": "game not found"}, 404
-        return predict_game(game)
+    try:
+        game, pred = await predictor.predict(summoner_name)
+        return {
+            "game": game.to_json(),
+            "chancesOfWinning": pred
+        }
+    except:
+        return {}, 404
 
 
 if __name__ == "__main__":
