@@ -1,17 +1,21 @@
-import os
-
-from flask import Flask, request
-from dotenv import load_dotenv
+from flask import Flask, request, send_file
 
 from predict import Predictor
 
-# Load environment file
-load_dotenv()
-riot_key = os.getenv("RIOT_KEY")
 
-app = Flask(__name__)
+predictor = Predictor("models/model.pt")
 
-predictor = Predictor("models/20220708_23-12-18/epoch_46/model.pt")
+app = Flask(__name__, static_folder="static", static_url_path="")
+
+
+@app.route("/", methods=["GET"])
+def index():
+    return send_file("static/index.html")
+
+
+@app.route("/game.js", methods=["GET"])
+def game_js():
+    return send_file("static/game.js")
 
 
 @app.get("/live")
@@ -26,8 +30,8 @@ async def get_live_game():
             "chancesOfWinning": pred
         }
     except:
-        return {}, 404
+        return {"error": "Match not found."}
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=8080)

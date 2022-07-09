@@ -1,0 +1,15 @@
+# Models
+models/
+
+# Static
+static/
+
+# Git
+.git/
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+venv
