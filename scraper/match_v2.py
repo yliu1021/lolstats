@@ -87,7 +87,7 @@ async def scrape_summoner(lc: LolClient):
         summoner_puuid = await summoners_to_scrape.get()
         try:
             matchlist = await lc.match.match_history(
-                puuid=summoner_puuid, start_time=1655989200, count=100
+                puuid=summoner_puuid, start_time=1658926800, count=100
             )
             if matches_to_scrape.qsize() > 10_000:
                 continue

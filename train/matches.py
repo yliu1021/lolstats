@@ -64,7 +64,7 @@ class MatchesDataset(Dataset):
                     # "info.participants.0.gameEndedInSurrender": False,
                     "info.participants.0.gameEndedInEarlySurrender": False,
                     "info.queueId": {"$lt": 2000, "$gt": 320},
-                    "info.gameVersion": {"$regex": "^12\.12.*"},
+                    "info.gameVersion": {"$regex": "^12\.14.*"},
                 }
             )
             print("Loading matches...")
