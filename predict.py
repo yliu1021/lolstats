@@ -15,7 +15,7 @@ import train
 load_dotenv()
 riot_key = os.getenv("RIOT_KEY")
 
-champions_ = json.load(open("./datadragon/12.12.1/champion.json", "r", encoding="utf8"))
+champions_ = json.load(open("./datadragon/12.14.1/champion.json", "r", encoding="utf8"))
 champions_ = champions_["data"]
 champions_ = dict((int(champion["key"]), champion) for champion in champions_.values())
 

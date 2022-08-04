@@ -8,7 +8,7 @@ class GameToTensor:
     """Converts game data to tensor"""
 
     def __init__(self) -> None:
-        champions = json.load(open("./datadragon/12.12.1/champion.json", "r", encoding="utf8"))
+        champions = json.load(open("./datadragon/12.14.1/champion.json", "r", encoding="utf8"))
         champions = champions["data"]
         champions = dict(
             (int(champion["key"]), champion) for champion in champions.values()
@@ -18,7 +18,7 @@ class GameToTensor:
         )
         self.num_champions = len(self.champion_ids)
 
-        summoner_spells = json.load(open("./datadragon/12.12.1/summoner.json", "r"))
+        summoner_spells = json.load(open("./datadragon/12.14.1/summoner.json", "r"))
         summoner_spells = summoner_spells["data"]
         summoner_spells = dict(
             (int(summoner_spell["key"]), summoner_spell)
@@ -29,7 +29,7 @@ class GameToTensor:
         )
         self.num_summoner_spells = len(self.summoner_spell_ids)
 
-        runes_raw = json.load(open("./datadragon/12.12.1/runesReforged.json", "r"))
+        runes_raw = json.load(open("./datadragon/12.14.1/runesReforged.json", "r"))
         runes = {}
         for rune_page in runes_raw:
             for rune_slots in rune_page["slots"]:

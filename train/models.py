@@ -32,7 +32,7 @@ class MatchModel(nn.Module):
     def __init__(self) -> None:
         super().__init__()
         self.champion_embedding = Embedding(
-            num_indices=160, embedding_dims=256, num_ones=1
+            num_indices=161, embedding_dims=256, num_ones=1
         )
         self.summoner_spell_embedding = Embedding(
             num_indices=16, embedding_dims=32, num_ones=2
